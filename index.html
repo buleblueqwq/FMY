@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>打对有奖励吗</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎁</text></svg>">
+<style>
+  :root {
+    --bg1: #667eea;
+    --bg2: #764ba2;
+    --card: rgba(255, 255, 255, 0.92);
+    --accent: #ff6b9d;
+    --text: #3a3a5c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+    min-height: 100vh;
+    background: linear-gradient(135deg, var(--bg1) 0%, var(--bg2) 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    overflow-x: hidden;
+    position: relative;
+  }
+  /* 细腻噪点纹理 */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.06;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)'/%3E%3C/svg%3E");
+    z-index: 1;
+  }
+  /* 漂浮泡泡装饰 */
+  .bubbles { position: fixed; inset: 0; overflow: hidden; z-index: 0; pointer-events: none; }
+  .bubble {
+    position: absolute;
+    bottom: -80px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.5), rgba(255,255,255,0.08));
+    animation: floatUp linear infinite;
+  }
+  @keyframes floatUp {
+    to { transform: translateY(-110vh) rotate(360deg); opacity: 0; }
+  }
+
+  .card {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 460px;
+    background: var(--card);
+    backdrop-filter: blur(20px);
+    border-radius: 28px;
+    padding: 44px 36px;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.28), inset 0 1px 0 rgba(255,255,255,0.7);
+    text-align: center;
+    animation: cardIn 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(40px) scale(0.92); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .emoji { font-size: 58px; margin-bottom: 12px; display: inline-block; animation: bounce 2.2s ease-in-out infinite; }
+  @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+  h1 {
+    font-size: 26px;
+    color: var(--text);
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+  .subtitle { color: #9a9ab8; font-size: 14px; margin-bottom: 26px; }
+
+  /* 进度条 */
+  .progress-wrap {
+    background: #eceaf6;
+    border-radius: 999px;
+    height: 12px;
+    margin-bottom: 30px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.08);
+  }
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #ff9a9e, #fecfef, #a18cd1);
+    background-size: 200% 100%;
+    animation: shimmer 2s linear infinite;
+    transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  @keyframes shimmer { to { background-position: 200% 0; } }
+
+  .question {
+    font-size: 44px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 18px 0 26px;
+    font-variant-numeric: tabular-nums;
+    animation: qPop 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+  .question.shake { animation: shake 0.4s; }
+  @keyframes qPop { from { opacity: 0; transform: scale(0.7); } to { opacity: 1; transform: scale(1); } }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    20%,60% { transform: translateX(-12px); }
+    40%,80% { transform: translateX(12px); }
+  }
+
+  input#answer {
+    width: 100%;
+    font-size: 30px;
+    text-align: center;
+    padding: 14px;
+    border: 3px solid #e4e1f2;
+    border-radius: 18px;
+    outline: none;
+    color: var(--text);
+    font-weight: 600;
+    transition: all 0.25s;
+    background: #faf9ff;
+  }
+  input#answer:focus { border-color: var(--accent); box-shadow: 0 0 0 4px rgba(255,107,157,0.15); background: #fff; }
+
+  button.submit {
+    margin-top: 20px;
+    width: 100%;
+    padding: 16px;
+    font-size: 19px;
+    font-weight: 700;
+    color: #fff;
+    border: none;
+    border-radius: 18px;
+    cursor: pointer;
+    background: linear-gradient(135deg, #ff6b9d, #ff8fab, #c084fc);
+    background-size: 200% 100%;
+    transition: transform 0.15s, box-shadow 0.25s;
+    box-shadow: 0 10px 24px rgba(255,107,157,0.4);
+    letter-spacing: 2px;
+  }
+  button.submit:hover { transform: translateY(-2px); box-shadow: 0 14px 30px rgba(255,107,157,0.5); }
+  button.submit:active { transform: scale(0.97); }
+
+  .feedback { min-height: 30px; margin-top: 16px; font-size: 16px; font-weight: 600; }
+  .feedback.ok { color: #2fb344; animation: fadeUp 0.4s; }
+  .feedback.bad { color: #e5484d; animation: fadeUp 0.4s; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .step-dots { display: flex; justify-content: center; gap: 10px; margin-top: 24px; }
+  .dot {
+    width: 12px; height: 12px; border-radius: 50%;
+    background: #e4e1f2; transition: all 0.35s;
+  }
+  .dot.done { background: linear-gradient(135deg, #ff6b9d, #c084fc); transform: scale(1.25); }
+
+  /* ===== 结果页 ===== */
+  #result { display: none; }
+  #result.show { display: block; animation: cardIn 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+  .reveal-text {
+    font-size: 30px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.5;
+    margin: 10px 0 24px;
+    animation: qPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 0.2s both;
+  }
+  .reveal-text .hl {
+    background: linear-gradient(135deg, #ff6b9d, #c084fc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .photo-frame {
+    position: relative;
+    border-radius: 22px;
+    padding: 10px;
+    background: linear-gradient(135deg, #ff9a9e, #c084fc, #a18cd1);
+    box-shadow: 0 18px 44px rgba(160, 100, 220, 0.45);
+    animation: photoIn 0.9s cubic-bezier(0.34, 1.56, 0.64, 1) 0.7s both;
+    transform: rotate(-2deg);
+  }
+  @keyframes photoIn {
+    from { opacity: 0; transform: rotate(6deg) scale(0.6) translateY(40px); }
+    to { opacity: 1; transform: rotate(-2deg) scale(1) translateY(0); }
+  }
+  .photo-frame img {
+    width: 100%;
+    display: block;
+    border-radius: 15px;
+  }
+  .photo-caption {
+    margin-top: 22px;
+    font-size: 24px;
+    font-weight: 800;
+    color: var(--text);
+    letter-spacing: 2px;
+    animation: fadeUp 0.8s 1.3s both;
+  }
+  .photo-caption .heart { display: inline-block; animation: heartbeat 1.2s ease-in-out infinite; }
+  @keyframes heartbeat { 0%,100% { transform: scale(1); } 25% { transform: scale(1.3); } 40% { transform: scale(1); } 60% { transform: scale(1.25); } }
+
+  /* 彩带 canvas */
+  #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+
+  .footer-tip { margin-top: 26px; font-size: 12px; color: #b6b3cf; }
+</style>
+</head>
+<body>
+
+<div class="bubbles" id="bubbles"></div>
+<canvas id="confetti-canvas"></canvas>
+
+<div class="card">
+  <!-- 答题页 -->
+  <div id="quiz">
+    <span class="emoji">🎁</span>
+    <h1>打对有奖励吗</h1>
+    <p class="subtitle">挑战 5 道简单的加减法，答对有惊喜哦～</p>
+
+    <div class="progress-wrap"><div class="progress-bar" id="progress"></div></div>
+
+    <div class="question" id="question">3 + 4 = ?</div>
+
+    <input type="text" id="answer" inputmode="numeric" autocomplete="off" placeholder="输入答案">
+    <button class="submit" id="submitBtn">提 交</button>
+    <div class="feedback" id="feedback"></div>
+    <div class="step-dots" id="dots"></div>
+  </div>
+
+  <!-- 结果页 -->
+  <div id="result">
+    <span class="emoji">🎉</span>
+    <div class="reveal-text">符梦瑶居然<br><span class="hl">不是傻子呀</span></div>
+    <div class="photo-frame"><img src="photo.png" alt="符梦瑶"></div>
+    <div class="photo-caption">符梦瑶好美呀 <span class="heart">💖</span></div>
+    <p class="footer-tip">恭喜你完成全部挑战，奖励已送达 ✨</p>
+  </div>
+</div>
+
+<script>
+  // ---------- 漂浮泡泡背景 ----------
+  (function () {
+    const box = document.getElementById("bubbles");
+    for (let i = 0; i < 14; i++) {
+      const b = document.createElement("div");
+      b.className = "bubble";
+      const size = 12 + Math.random() * 46;
+      b.style.width = b.style.height = size + "px";
+      b.style.left = Math.random() * 100 + "%";
+      b.style.animationDuration = 9 + Math.random() * 14 + "s";
+      b.style.animationDelay = -Math.random() * 20 + "s";
+      box.appendChild(b);
+    }
+  })();
+
+  // ---------- 出题逻辑 ----------
+  const TOTAL = 5;
+  let current = 0, correct = 0;
+  let a, b, op, ans;
+
+  const qEl = document.getElementById("question");
+  const input = document.getElementById("answer");
+  const fb = document.getElementById("feedback");
+  const bar = document.getElementById("progress");
+  const dots = document.getElementById("dots");
+
+  function rnd(n) { return Math.floor(Math.random() * n); }
+
+  function nextQuestion() {
+    if (Math.random() < 0.5) { op = "+"; a = rnd(50); b = rnd(50); ans = a + b; }
+    else {
+      op = "-"; a = 10 + rnd(80); b = rnd(a); ans = a - b;
+    }
+    qEl.textContent = a + " " + op + " " + b + " = ?";
+    // 重触发弹跳动画
+    qEl.style.animation = "none"; void qEl.offsetWidth; qEl.style.animation = "";
+    input.value = ""; input.focus();
+  }
+
+  // 初始化进度点
+  for (let i = 0; i < TOTAL; i++) {
+    const d = document.createElement("div");
+    d.className = "dot"; d.id = "dot" + i;
+    dots.appendChild(d);
+  }
+
+  function submit() {
+    const v = input.value.trim();
+    if (v === "") { input.focus(); return; }
+    if (parseInt(v, 10) === ans) {
+      correct++;
+      fb.className = "feedback ok";
+      fb.textContent = "✔ 答对啦！";
+      document.getElementById("dot" + current).classList.add("done");
+      current++;
+      bar.style.width = (current / TOTAL * 100) + "%";
+      if (current >= TOTAL) { showResult(); return; }
+      setTimeout(nextQuestion, 550);
+    } else {
+      fb.className = "feedback bad";
+      fb.textContent = "✘ 答错了，再想想～";
+      qEl.classList.add("shake");
+      setTimeout(() => qEl.classList.remove("shake"), 450);
+      input.select();
+    }
+  }
+
+  document.getElementById("submitBtn").addEventListener("click", submit);
+  input.addEventListener("keydown", e => { if (e.key === "Enter") submit(); });
+
+  // ---------- 结果页 + 彩带 ----------
+  function showResult() {
+    document.getElementById("quiz").style.display = "none";
+    const r = document.getElementById("result");
+    r.classList.add("show");
+    launchConfetti();
+    setInterval(() => { if (Math.random() < 0.35) launchConfetti(); }, 3000);
+  }
+
+  function launchConfetti() {
+    const colors = ["#ff6b9d", "#c084fc", "#ffd166", "#06d6a0", "#a0e7ff", "#ff9a9e"];
+    const canvas = document.getElementById("confetti-canvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = innerWidth; canvas.height = innerHeight;
+    const pieces = [];
+    for (let i = 0; i < 120; i++) {
+      pieces.push({
+        x: Math.random() * canvas.width,
+        y: -20 - Math.random() * canvas.height * 0.4,
+        w: 6 + Math.random() * 8,
+        h: 8 + Math.random() * 10,
+        c: colors[rnd(colors.length)],
+        vy: 2 + Math.random() * 3.5,
+        vx: -1.5 + Math.random() * 3,
+        rot: Math.random() * Math.PI,
+        vr: -0.1 + Math.random() * 0.2
+      });
+    }
+    let frames = 0;
+    (function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      pieces.forEach(p => {
+        p.x += p.vx; p.y += p.vy; p.rot += p.vr;
+        ctx.save();
+        ctx.translate(p.x, p.y);
+        ctx.rotate(p.rot);
+        ctx.fillStyle = p.c;
+        ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+        ctx.restore();
+      });
+      if (++frames < 260) requestAnimationFrame(draw);
+      else ctx.clearRect(0, 0, canvas.width, canvas.height);
+    })();
+  }
+
+  nextQuestion();
+</script>
+</body>
+</html>
